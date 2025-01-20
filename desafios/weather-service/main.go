@@ -17,6 +17,21 @@ type WeatherResponse struct {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Valor padrão
+	}
+
+	r := setupRouter(getLocationFromZip, getWeather)
+
+	log.Printf("Starting server on port %s", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
+}
+
+// setupRouter cria e retorna o roteador
+func setupRouter(locationFunc func(string) (string, error), weatherFunc func(string) (float64, error)) *gin.Engine {
 	r := gin.Default()
 
 	r.GET("/weather/:zipcode", func(c *gin.Context) {
@@ -26,13 +41,13 @@ func main() {
 			return
 		}
 
-		location, err := getLocationFromZip(zipcode)
+		location, err := locationFunc(zipcode)
 		if err != nil {
 			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode " + err.Error()})
 			return
 		}
 
-		tempC, err := getWeather(location)
+		tempC, err := weatherFunc(location)
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "could not fetch weather data"})
 			return
@@ -48,16 +63,7 @@ func main() {
 		})
 	})
 
-	// Porta dinâmica para Cloud Run
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080" // Valor padrão
-	}
-
-	log.Printf("Starting server on port %s", port)
-	if err := r.Run(":" + port); err != nil {
-		log.Fatalf("Failed to start server: %v", err)
-	}
+	return r
 }
 
 func getLocationFromZip(zipcode string) (string, error) {
@@ -93,7 +99,7 @@ func getWeather(city string) (float64, error) {
 	resp, err := client.R().
 		SetHeader("Accept", "application/json").
 		SetQueryParam("q", city).
-		SetQueryParam("key", "API_KEY"). // Substitua pela chave da WeatherAPI
+		SetQueryParam("key", "API+KEY"). // Substitua pela chave da WeatherAPI
 		Get("https://api.weatherapi.com/v1/current.json")
 
 	if err != nil || resp.StatusCode() != 200 {
