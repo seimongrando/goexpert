@@ -2,7 +2,9 @@ package main
 
 import (
 	"encoding/json"
+	"log"
 	"net/http"
+	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/go-resty/resty/v2"
@@ -26,7 +28,7 @@ func main() {
 
 		location, err := getLocationFromZip(zipcode)
 		if err != nil {
-			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode"})
+			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode " + err.Error()})
 			return
 		}
 
@@ -46,7 +48,16 @@ func main() {
 		})
 	})
 
-	r.Run(":8080") // Porta local
+	// Porta dinâmica para Cloud Run
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080" // Valor padrão
+	}
+
+	log.Printf("Starting server on port %s", port)
+	if err := r.Run(":" + port); err != nil {
+		log.Fatalf("Failed to start server: %v", err)
+	}
 }
 
 func getLocationFromZip(zipcode string) (string, error) {

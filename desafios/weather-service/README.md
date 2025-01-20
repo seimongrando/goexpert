@@ -152,13 +152,18 @@
    ```
 
 3. **Testar a Aplicação**
-   ```bash
-   curl http://localhost:8080/weather/01001000
-   ```
+   1. Local
+      ```bash
+      curl http://localhost:8080/weather/01001000
+      ```
+   2. Google
+      ```bash
+      curl https://weather-service-862565493312.us-central1.run.app/weather/01001000
+      ```
 
 ---
 
 #### **Notas**
 
 - Substitua `PROJECT-ID` pelo ID do projeto no Google Cloud.
-- Certifique-se de ter uma chave válida da [WeatherAPI](https://www.weatherapi.com/) e configure-a no código em `getWeather`.
+- Certifique-se de ter uma chave válida da [WeatherAPI](https://www.weatherapi.com/) e configure-a no código em `getWeather` substituindo  `API_KEY`.
