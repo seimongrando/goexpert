@@ -43,7 +43,7 @@ func setupRouter(locationFunc func(string) (string, error), weatherFunc func(str
 
 		location, err := locationFunc(zipcode)
 		if err != nil || location == "" {
-			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode " + err.Error()})
+			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode"})
 			return
 		}
 
