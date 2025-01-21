@@ -80,8 +80,12 @@ func setupRouter(locationFunc func(context.Context, string) (string, error), wea
 		}
 
 		location, err := locationFunc(ctx, zipcode)
-		if err != nil {
-			span.SetAttributes(attribute.String("error", err.Error()))
+		if err != nil || location == "" {
+			if err != nil {
+				span.SetAttributes(attribute.String("error", err.Error()))
+			} else {
+				span.SetAttributes(attribute.String("error", "invalid zipcode"))
+			}
 			c.JSON(http.StatusNotFound, gin.H{"message": "can not find zipcode"})
 			return
 		}
